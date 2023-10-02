@@ -1,29 +1,26 @@
 classdef Filter
    methods (Static)
-       function lpfImg = lpf(img, h)
+       function pfImg = pf(img, h)
            [height, width] = size(img);
            %padding
-           lpfImg = img;
+           pfImg = img;
            pad_h = 2*height;
            pad_w = 2*width;
-           lpfImg = padarray(lpfImg, [height, width], 0, "post");
+           pfImg = padarray(pfImg, [height, width], 0, "post");
            %fourier
-           fourier_img = fft2(double(lpfImg));
+           fourier_img = fft2(double(pfImg));
            
            ilpf_f = h .* fourier_img;
 
            ilpf_f2 = real(ifft2(ilpf_f));
-           lpfImg = ilpf_f2(1:height, 1:width);
-           lpfImg = uint8(lpfImg);
-
-           
-
+           pfImg = ilpf_f2(1:height, 1:width);
+           pfImg = uint8(pfImg);
        end
-       function ilpfImg = ilpf(img, d0)
+       function ipfImg = ipf(img, d0, high)
            [height, width, channels] = size(img);
            pad_h = height * 2;
            pad_w = width * 2;
-           ilpfImg = zeros(size(img));
+           ipfImg = zeros(size(img));
            for ch=1:channels
                u = 0:(pad_h - 1);
                v = 0:(pad_w - 1);
@@ -36,19 +33,21 @@ classdef Filter
                [V,U] = meshgrid(v,u);
                d = sqrt(U .^ 2 + V .^ 2);
                h = double(d <= d0);
-
+               if (high)
+                   h = 1-h;
+               end
                h = fftshift(h);
                h = ifftshift(h);
 
-               ilpfImg(:,:,ch) = Filter.lpf(img(:,:,ch), h);
+               ipfImg(:,:,ch) = Filter.pf(img(:,:,ch), h);
            end
-           ilpfImg = uint8(ilpfImg);
+           ipfImg = uint8(ipfImg);
        end
-       function glpfImg = glpf(img, d0)
+       function gpfImg = gpf(img, d0, high)
            [height, width, channels] = size(img);
            pad_h = height * 2;
            pad_w = width * 2;
-           glpfImg = zeros(size(img));
+           gpfImg = zeros(size(img));
            for ch=1:channels
                u = 0:(pad_h - 1);
                v = 0:(pad_w - 1);
@@ -61,22 +60,24 @@ classdef Filter
                [V,U] = meshgrid(v,u);
                d = sqrt(U .^ 2 + V .^ 2);
                h = exp(-(d.^2) ./(2 * (d0^2)));
-
+               if (high)
+                   h = 1-h;
+               end
                h = fftshift(h);
                h = ifftshift(h);
 
-               glpfImg(:,:,ch) = Filter.lpf(img(:,:,ch), h);
+               gpfImg(:,:,ch) = Filter.pf(img(:,:,ch), h);
            end
-           glpfImg = uint8(glpfImg);
+           gpfImg = uint8(gpfImg);
        end
-       function blpfImg = blpf(img, d0, n)
+       function bpfImg = bpf(img, d0, n, high)
            if (n < 1)
                n = 1;
            end
            [height, width, channels] = size(img);
            pad_h = height * 2;
            pad_w = width * 2;
-           blpfImg = zeros(size(img));
+           bpfImg = zeros(size(img));
            for ch=1:channels
                u = 0:(pad_h - 1);
                v = 0:(pad_w - 1);
@@ -89,13 +90,16 @@ classdef Filter
                [V,U] = meshgrid(v,u);
                d = sqrt(U .^ 2 + V .^ 2);
                h = 1 ./ (1 + (d ./d0) .^(2*n));
+               if (high)
+                   h = 1-h;
+               end
 
                h = fftshift(h);
                h = ifftshift(h);
 
-               blpfImg(:,:,ch) = Filter.lpf(img(:,:,ch), h);
+               bpfImg(:,:,ch) = Filter.pf(img(:,:,ch), h);
            end
-           blpfImg = uint8(blpfImg);
+           bpfImg = uint8(bpfImg);
        end
                
    end

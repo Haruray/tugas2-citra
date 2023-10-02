@@ -48,8 +48,8 @@ classdef ImProcTools
     end
     function fourierImg = showFourierImg(fourier)
         fourier_shifted = fftshift(fourier);
-        s2 = log(1 + abs(fourier_shifted));
-        figure; imshow(s2, []); title('Fourier Spectrum');
+        fourierImg = log(1 + abs(fourier_shifted));
+        figure; imshow(fourierImg, []); title('Fourier Spectrum');
     end
    end
 end
