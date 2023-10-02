@@ -44,8 +44,12 @@ classdef ImProcTools
                     convolutionImg(i + kernelCenter, j + kernelCenter, ch) = sum(extractedImage .* kernel, "all") / div;
                 end
             end 
-        end
-               
+        end        
+    end
+    function fourierImg = showFourierImg(fourier)
+        fourier_shifted = fftshift(fourier);
+        s2 = log(1 + abs(fourier_shifted));
+        figure; imshow(s2, []); title('Fourier Spectrum');
     end
    end
 end
