@@ -5,7 +5,7 @@ classdef ImProcTools
         %fungsi untuk menghitung frekuensi dan unique values, yang
         %digunakan untuk plot bar
         [freq, uniqueVals] = ImProcTools.getHistData(img);
-        histImg = bar(uniqueVals(1:end-1), freq);
+        figure;histImg = bar(uniqueVals(1:end-1), freq);
         xlabel("Pixel Value");
         ylabel("Frequency");
         title("Image Histogram");
@@ -46,10 +46,15 @@ classdef ImProcTools
             end 
         end        
     end
-    function fourierImg = showFourierImg(fourier)
+    function fourierImg = showFourierImg(img, show)
+        img = rgb2gray(img);
+        fourier = fft2(img);
         fourier_shifted = fftshift(fourier);
-        fourierImg = log(1 + abs(fourier_shifted));
-        figure; imshow(fourierImg, []); title('Fourier Spectrum');
+        fourierImg = abs(fourier_shifted);
+        fourierImg = log(fourierImg + 1);
+        if (show)
+            figure; imagesc(100*fourierImg); colormap(gray); imshow(fourierImg, []); title('Fourier Spectrum');
+        end
     end
     
    end
