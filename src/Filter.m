@@ -101,6 +101,58 @@ classdef Filter
            end
            bpfImg = uint8(bpfImg);
        end
+
+       function spatialFilterImg = spatialFilter(img, padding, type, kernelSize, d)
+        %center point of the kernel
+        kernelCenter = floor(kernelSize / 2);
+        %image dimension
+        imgSize = size(img);
+        channels = imgSize(3);
+        
+        spatialFilterImg = img;
+        
+        for ch = 1 : channels
+            %change img to float
+            processedImg = img(:,:,ch);
+            %reshape the size of image based on chosen padding
+            if (padding == 'fillzero')
+                processedImg = padarray(processedImg, [kernelCenter, kernelCenter], 0, "both");
+            end
+            processedImg = double(processedImg);
+            for i=1:imgSize(1) - kernelCenter - 1
+                for j=1:imgSize(2) - kernelCenter - 1
+                    extractedImage = processedImg(i : i + kernelSize - 1 , j : j + kernelSize - 1);
+                    res = 0;
+                    if (type=="arithmetic_mean")
+                        res = mean(extractedImage, "all");
+                    elseif (type=="geo_mean")
+                        res = geomean(extractedImage, "all");
+                    elseif (type=="harmonic_mean")
+                        res = harmmean(extractedImage, "all");
+                    elseif (type == "max")
+                        res = max(extractedImage,[], "all");
+                    elseif (type == "min")
+                        res = min(extractedImage, [], "all");
+                    elseif (type == "midpoint")
+                        res = (max(extractedImage, [], "all") + min(extractedImage, [], "all")) / 2;
+                    elseif (type == "alpha_trimmed_mean")
+                        d = floor(d/2);
+                        trimmedExtractedImage = extractedImage;
+                        for i=1:d
+                            vectorizedTrim = trimmedExtractedImage(:);
+                            [maxVal, maxIndex] = max(vectorizedTrim);
+                            [row, col] = ind2sub(size(trimmedExtractedImage), maxIndex);
+                            linearIdx = sub2ind(size(trimmedExtractedImage), row, col);
+                            vectorizedTrim(linearIdx) = [];
+                            res = mean(vectorizedTrim, "all");
+                        end
+                    end
+                    spatialFilterImg(i + kernelCenter, j + kernelCenter, ch) = res;
+                end
+            end 
+        end
+        spatialFilterImg = uint8(spatialFilterImg);
+    end
                
    end
 end

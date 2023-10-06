@@ -4,5 +4,5 @@ img = imread('../data/colored/1.png');
 %conv = imtool.convolution(img, kernel, "fillzero");
 figure;imshow(img);
 %figure;imshow(conv);
-ilpfImg = Filter.bpf(img, 50, 1, true);
+ilpfImg = Filter.spatialFilter(img, "ignore", "alpha_trimmed_mean", 3, 4);
 figure;imshow(ilpfImg);

@@ -51,5 +51,6 @@ classdef ImProcTools
         fourierImg = log(1 + abs(fourier_shifted));
         figure; imshow(fourierImg, []); title('Fourier Spectrum');
     end
+    
    end
 end
